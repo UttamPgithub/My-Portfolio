@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ profile.name }} | Python Web Scraping Developer</title>
 
-    <!-- Fonts -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Three.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <style>
         :root {
-            --bg-color: #0d1117;
+            --bg-color: #0b0e14;
             --card-bg: rgba(22, 27, 34, 0.88);
             --border-color: #30363d;
             --text-primary: #f0f6fc;
@@ -23,7 +23,7 @@
             --accent: #58a6ff;
             --accent-hover: #1f6feb;
             --tag-bg: #21262d;
-            --font-main: 'Plus Jakarta Sans', system-ui, sans-serif;
+            --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
             --font-code: 'JetBrains Mono', monospace;
         }
 
@@ -43,17 +43,17 @@
             font-family: var(--font-main);
             line-height: 1.6;
             overflow-x: hidden;
-            perspective: 1200px;
+            position: relative;
         }
 
-        /* 3D Background Canvas */
+        /* 3D Background Canvas Layer - Strictly Behind Content */
         #bg-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 0;
+            z-index: 1;
             pointer-events: none;
         }
 
@@ -62,17 +62,17 @@
             margin: 0 auto;
             padding: 0 1.5rem;
             position: relative;
-            z-index: 1;
+            z-index: 10;
         }
 
-        /* Navigation Bar */
+        /* Sticky Navigation Bar */
         .navbar {
             border-bottom: 1px solid var(--border-color);
-            background-color: rgba(13, 17, 23, 0.92);
+            background-color: rgba(11, 14, 20, 0.94);
             backdrop-filter: blur(12px);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
         }
 
         .nav-content {
@@ -88,65 +88,58 @@
             color: var(--accent);
             font-size: 1.05rem;
             cursor: pointer;
+            user-select: none;
         }
 
         nav a {
             color: var(--text-secondary);
             text-decoration: none;
-            margin-left: 1rem;
-            font-size: 0.9rem;
+            margin-left: 0.6rem;
+            font-size: 0.88rem;
             font-weight: 500;
             padding: 0.4rem 0.8rem;
             border-radius: 6px;
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
             cursor: pointer;
+            display: inline-block;
         }
 
         nav a:hover, nav a.active-topic {
             color: #ffffff;
-            background: rgba(88, 166, 255, 0.25);
+            background: rgba(88, 166, 255, 0.2);
             border: 1px solid rgba(88, 166, 255, 0.4);
         }
 
-        /* Topic Sections */
+        /* Interactive Sections with Zoom Transition */
         .section {
             padding: 3.5rem 0;
             border-bottom: 1px solid var(--border-color);
-            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-                        opacity 0.8s ease,
-                        filter 0.8s ease;
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        opacity 0.5s ease,
+                        filter 0.5s ease;
             transform-origin: center center;
+            position: relative;
             will-change: transform, opacity;
         }
 
-        /* INFINITE ZOOM & HIGHLIGHT ANIMATION */
-        .section.topic-infinite-zoom {
-            transform: scale(1.05) translateZ(60px);
+        /* ZOOM IN FOCUS STATE */
+        .section.is-zoomed {
+            transform: scale(1.06) !important;
             opacity: 1 !important;
             filter: blur(0px) !important;
-            animation: pulseInfiniteZoom 3.2s infinite alternate ease-in-out;
+            z-index: 40;
         }
 
-        @keyframes pulseInfiniteZoom {
-            0% {
-                transform: scale(1.04) translateZ(50px);
-            }
-            100% {
-                transform: scale(1.10) translateZ(110px);
-            }
+        .section.is-zoomed .card {
+            border-color: #58a6ff !important;
+            box-shadow: 0 0 30px rgba(88, 166, 255, 0.25) !important;
         }
 
-        .section.topic-infinite-zoom .card {
-            border-color: #58a6ff;
-            box-shadow: 0 0 35px rgba(88, 166, 255, 0.35), 0 0 70px rgba(31, 111, 235, 0.2);
-        }
-
-        /* Dimmed out other sections */
-        .section.topic-dimmed {
-            transform: scale(0.92) translateZ(-80px);
-            opacity: 0.25;
-            filter: blur(3px);
-            pointer-events: none;
+        /* ZOOM OUT & DIMMED STATE FOR INACTIVE SECTIONS */
+        .section.is-dimmed {
+            transform: scale(0.94) !important;
+            opacity: 0.25 !important;
+            filter: blur(2px) !important;
         }
 
         .section-title {
@@ -155,7 +148,7 @@
             font-weight: 700;
         }
 
-        /* Hero Split */
+        /* Hero Layout */
         .hero {
             padding-top: 4rem;
         }
@@ -199,30 +192,45 @@
             line-height: 1.6;
         }
 
+        /* Functional Hero Action Buttons */
         .hero-actions {
             margin-top: 1.5rem;
             display: flex;
             gap: 1rem;
+            position: relative;
+            z-index: 500 !important;
+            pointer-events: auto !important;
         }
 
         .btn {
-            display: inline-block;
-            padding: 0.6rem 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.65rem 1.25rem;
             border-radius: 6px;
             text-decoration: none;
             font-weight: 600;
             font-size: 0.9rem;
-            cursor: pointer;
-            transition: 0.2s;
+            cursor: pointer !important;
+            pointer-events: auto !important;
+            transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+            position: relative;
+            z-index: 501 !important;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
         }
 
         .btn-primary {
             background-color: var(--accent);
             color: #0d1117;
+            border: 1px solid var(--accent);
         }
 
         .btn-primary:hover {
             background-color: var(--accent-hover);
+            border-color: var(--accent-hover);
             color: #ffffff;
         }
 
@@ -233,10 +241,11 @@
         }
 
         .btn-secondary:hover {
-            background-color: var(--border-color);
+            background-color: #30363d;
+            border-color: #8b949e;
         }
 
-        /* Scraping Terminal */
+        /* Scraping Terminal Window */
         .terminal-card {
             background: rgba(13, 17, 23, 0.95);
             border: 1px solid rgba(88, 166, 255, 0.35);
@@ -296,17 +305,17 @@
         .log-success { color: #3fb950; }
         .log-accent { color: #58a6ff; }
 
-        /* Card Elements */
+        /* General Card Layout */
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 1.5rem;
             backdrop-filter: blur(8px);
-            transition: all 0.5s ease;
+            transition: all 0.4s ease;
         }
 
-        /* Skills */
+        /* Skills Grid */
         .skills-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -334,7 +343,7 @@
             color: var(--text-secondary);
         }
 
-        /* Experience Timeline */
+        /* Timeline */
         .timeline {
             display: flex;
             flex-direction: column;
@@ -365,6 +374,7 @@
             border-radius: 4px;
             border: 1px solid var(--border-color);
             color: var(--text-secondary);
+            white-space: nowrap;
         }
 
         .bullet-list {
@@ -419,6 +429,7 @@
         .contact-links a {
             color: var(--accent);
             text-decoration: none;
+            width: fit-content;
         }
 
         .contact-links a:hover {
@@ -434,6 +445,8 @@
             text-align: center;
             color: var(--text-secondary);
             font-size: 0.8rem;
+            position: relative;
+            z-index: 10;
         }
 
         @media (max-width: 800px) {
@@ -454,18 +467,18 @@
         <div class="container nav-content">
             <span class="logo" id="reset-view">&lt;{{ profile.name.split()[0] }}.scrape()/&gt;</span>
             <nav id="navbar-links">
-                <a href="#about" class="topic-btn">About</a>
-                <a href="#skills" class="topic-btn">Skills</a>
-                <a href="#experience" class="topic-btn">Experience</a>
-                <a href="#domains" class="topic-btn">Domains</a>
-                <a href="#education" class="topic-btn">Education</a>
-                <a href="#contact" class="topic-btn">Contact</a>
+                <a href="#about" class="nav-topic">About</a>
+                <a href="#skills" class="nav-topic">Skills</a>
+                <a href="#experience" class="nav-topic">Experience</a>
+                <a href="#domains" class="nav-topic">Domains</a>
+                <a href="#education" class="nav-topic">Education</a>
+                <a href="#contact" class="nav-topic">Contact</a>
             </nav>
         </div>
     </header>
 
     <main class="container">
-        <!-- Hero Topic -->
+        <!-- Hero Section -->
         <section id="about" class="hero section">
             <div class="hero-split">
                 <div class="hero-text">
@@ -474,8 +487,18 @@
                     <h2 class="subheading">{{ profile.title }}</h2>
                     <p class="bio">{{ profile.bio }}</p>
                     <div class="hero-actions">
-                        <a href="#contact" class="btn btn-primary topic-btn">Start Data Pipeline</a>
-                        <a href="{{ profile.contact.linkedin }}" target="_blank" rel="noopener" class="btn btn-secondary">LinkedIn Profile</a>
+                        <!-- Direct GitHub Profile Button -->
+                        <a href="{{ profile.contact.github }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                            <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: text-bottom; margin-right: 7px;">
+                                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                            </svg>
+                            GitHub Profile
+                        </a>
+
+                        <!-- Direct LinkedIn Profile Button -->
+                        <a href="{{ profile.contact.linkedin }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+                            LinkedIn Profile
+                        </a>
                     </div>
                 </div>
 
@@ -495,7 +518,7 @@
             </div>
         </section>
 
-        <!-- Technical Skills Topic -->
+        <!-- Technical Skills -->
         <section id="skills" class="section">
             <h3 class="section-title">Technical Expertise</h3>
             <div class="skills-grid">
@@ -512,7 +535,7 @@
             </div>
         </section>
 
-        <!-- Experience Timeline Topic -->
+        <!-- Experience Timeline -->
         <section id="experience" class="section">
             <h3 class="section-title">Professional Experience</h3>
             <div class="timeline">
@@ -535,7 +558,7 @@
             </div>
         </section>
 
-        <!-- Project Domains Topic -->
+        <!-- Project Domains -->
         <section id="domains" class="section">
             <h3 class="section-title">Project Categories</h3>
             <div class="domains-grid">
@@ -548,7 +571,7 @@
             </div>
         </section>
 
-        <!-- Education Topic -->
+        <!-- Education -->
         <section id="education" class="section">
             <h3 class="section-title">Education</h3>
             <div class="card">
@@ -560,7 +583,7 @@
             </div>
         </section>
 
-        <!-- Contact Topic -->
+        <!-- Contact Section -->
         <section id="contact" class="section">
             <div class="card contact-card">
                 <h3>Contact & Connect</h3>
@@ -576,25 +599,21 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 {{ profile.name }}. Infinite 3D Topic Zoom Experience.</p>
+            <p>&copy; 2026 {{ profile.name }}. Python Web Scraping &amp; Data Pipeline Architecture.</p>
         </div>
     </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // ==========================================================
-            // 1. Three.js Engine: Infinite Warp & Dynamic Zoom Loop
+            // 1. Three.js Engine: Interactive Spider Web Crawler Canvas
             // ==========================================================
             const canvas = document.getElementById('bg-canvas');
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 1, 1400);
 
-            const defaultCamZ = 430;
-            camera.position.z = defaultCamZ;
-
-            // Infinite zoom flight controllers
-            let isInfiniteZooming = false;
-            let infiniteSpeed = 0;
+            camera.position.z = 430;
+            let targetFov = 65; // Dynamic FOV lens zoom controller
 
             const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -629,6 +648,7 @@
             const nodeMesh = new THREE.Points(nodeGeometry, nodeMaterial);
             scene.add(nodeMesh);
 
+            // Active Green Scraping Data Packets
             const packetCount = 20;
             const packetGeometry = new THREE.SphereGeometry(2.2, 8, 8);
             const packetMaterial = new THREE.MeshBasicMaterial({ color: 0x3fb950 });
@@ -648,7 +668,7 @@
             const lineMaterial = new THREE.LineBasicMaterial({
                 color: 0x1f6feb,
                 transparent: true,
-                opacity: 0.25
+                opacity: 0.22
             });
             let lineSegments = null;
 
@@ -667,18 +687,17 @@
             function animate() {
                 requestAnimationFrame(animate);
 
-                // Check infinite forward zoom
-                if (isInfiniteZooming) {
-                    infiniteSpeed = THREE.MathUtils.lerp(infiniteSpeed, 2.5, 0.05);
-                } else {
-                    infiniteSpeed = THREE.MathUtils.lerp(infiniteSpeed, 0, 0.05);
+                // Smooth camera FOV zoom transition
+                if (Math.abs(camera.fov - targetFov) > 0.1) {
+                    camera.fov += (targetFov - camera.fov) * 0.08;
+                    camera.updateProjectionMatrix();
                 }
 
                 camera.position.x += (mouseX - camera.position.x) * 0.05;
                 camera.position.y += (-mouseY - camera.position.y) * 0.05;
                 camera.lookAt(scene.position);
 
-                nodeMesh.rotation.y += 0.0006 + (infiniteSpeed * 0.001);
+                nodeMesh.rotation.y += 0.0006;
 
                 const pos = nodeGeometry.attributes.position.array;
                 const lineCoords = [];
@@ -687,14 +706,11 @@
                     const idx = i * 3;
                     pos[idx] += nodeVelocities[i].x;
                     pos[idx + 1] += nodeVelocities[i].y;
-                    pos[idx + 2] += nodeVelocities[i].z + (infiniteSpeed * 1.8); // Infinite forward motion
+                    pos[idx + 2] += nodeVelocities[i].z;
 
-                    // Recycle stars/nodes backwards when passing through camera (Infinite Tunnel Effect)
-                    if (pos[idx + 2] > 400) {
-                        pos[idx + 2] = -400;
-                    }
                     if (pos[idx] < -400 || pos[idx] > 400) nodeVelocities[i].x *= -1;
                     if (pos[idx + 1] < -400 || pos[idx + 1] > 400) nodeVelocities[i].y *= -1;
+                    if (pos[idx + 2] < -350 || pos[idx + 2] > 350) nodeVelocities[i].z *= -1;
 
                     for (let j = i + 1; j < nodeCount; j++) {
                         const jdx = j * 3;
@@ -713,9 +729,9 @@
                 lineSegments = new THREE.LineSegments(lineGeo, lineMaterial);
                 scene.add(lineSegments);
 
-                // Update packets
+                // Move data packets along network paths
                 packetMeshes.forEach(pkt => {
-                    pkt.progress += 0.015 + (infiniteSpeed * 0.005);
+                    pkt.progress += 0.015;
                     if (pkt.progress >= 1) {
                         pkt.progress = 0;
                         pkt.startIdx = Math.floor(Math.random() * nodeCount);
@@ -734,58 +750,73 @@
             animate();
 
             // ==========================================================
-            // 2. Button Topic Infinite Zoom Handler
+            // 2. Zoom In / Zoom Out Toggle Controller
             // ==========================================================
             const allSections = document.querySelectorAll('.section');
-            const topicButtons = document.querySelectorAll('.topic-btn');
+            const navLinks = document.querySelectorAll('.navbar nav a.nav-topic');
             const resetBtn = document.getElementById('reset-view');
 
-            function activateTopicZoom(targetSection, activeBtn) {
-                isInfiniteZooming = true; // start continuous 3D camera warp
+            let activeZoomedId = null;
 
-                // Update active nav button
-                topicButtons.forEach(btn => btn.classList.remove('active-topic'));
-                if (activeBtn) activeBtn.classList.add('active-topic');
+            function zoomToSection(targetId) {
+                const targetSection = document.querySelector(targetId);
+                if (!targetSection) return;
 
-                // Dim out all sections except the active topic
-                allSections.forEach(sec => {
-                    sec.classList.remove('topic-infinite-zoom');
-                    sec.classList.add('topic-dimmed');
+                // Toggle: Clicking the active topic again zooms out to normal view
+                if (activeZoomedId === targetId) {
+                    resetAllZoom();
+                    return;
+                }
+
+                activeZoomedId = targetId;
+                targetFov = 40; // Zoom camera in
+
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === targetId) {
+                        link.classList.add('active-topic');
+                    } else {
+                        link.classList.remove('active-topic');
+                    }
                 });
 
-                // Zoom into the selected topic infinitely
-                targetSection.classList.remove('topic-dimmed');
-                targetSection.classList.add('topic-infinite-zoom');
+                allSections.forEach(sec => {
+                    if ('#' + sec.id === targetId) {
+                        sec.classList.remove('is-dimmed');
+                        sec.classList.add('is-zoomed');
+                    } else {
+                        sec.classList.remove('is-zoomed');
+                        sec.classList.add('is-dimmed');
+                    }
+                });
 
-                // Center view onto the topic
                 targetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
 
-            topicButtons.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const targetId = btn.getAttribute('href');
-                    if (!targetId || !targetId.startsWith('#')) return;
+            function resetAllZoom() {
+                activeZoomedId = null;
+                targetFov = 65; // Zoom camera out
 
-                    const targetSection = document.querySelector(targetId);
-                    if (!targetSection) return;
-
-                    e.preventDefault();
-                    activateTopicZoom(targetSection, btn);
-                });
-            });
-
-            // Reset Zoom by clicking the Logo or pressing Escape
-            function resetZoom() {
-                isInfiniteZooming = false;
-                topicButtons.forEach(btn => btn.classList.remove('active-topic'));
+                navLinks.forEach(link => link.classList.remove('active-topic'));
                 allSections.forEach(sec => {
-                    sec.classList.remove('topic-infinite-zoom', 'topic-dimmed');
+                    sec.classList.remove('is-zoomed', 'is-dimmed');
                 });
             }
 
-            if (resetBtn) resetBtn.addEventListener('click', resetZoom);
+            // Bind click handler exclusively to internal navbar section links
+            navLinks.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const href = btn.getAttribute('href');
+                    if (href && href.startsWith('#')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        zoomToSection(href);
+                    }
+                });
+            });
+
+            if (resetBtn) resetBtn.addEventListener('click', resetAllZoom);
             window.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') resetZoom();
+                if (e.key === 'Escape') resetAllZoom();
             });
 
             // ==========================================================

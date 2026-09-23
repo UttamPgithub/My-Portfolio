@@ -18,10 +18,11 @@ PROFILE_DATA = {
         "phone": "+91-7096991640",
         "location": "Mahesana, Gujarat, India",
         "linkedin": "https://www.linkedin.com/in/uttam-prajapati-682802259/",
+        "github": "https://github.com/UttamPgithub"
     },
     "skills": {
         "Languages": ["Python", "SQL"],
-        "Web Scraping & Automation": ["Scrapy", "Selenium", "Playwright", "Requests", "BeautifulSoup","Flask"],
+        "Web Scraping & Automation": ["Scrapy", "Selenium", "Playwright", "Requests", "BeautifulSoup"],
         "Data Processing": ["Pandas", "NumPy", "hashlib", "ETL Pipelines"],
         "Databases": ["MySQL", "MongoDB"],
         "Tools & Technologies": ["Git", "Linux"]
