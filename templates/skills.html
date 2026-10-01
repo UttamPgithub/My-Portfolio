@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Technical Skills | {{ profile.name }}{% endblock %}
+{% block nav_skills %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .skills-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.25rem;
+    }
+    .skill-card h4 {
+        margin-bottom: 0.85rem;
+        font-size: 1rem;
+        color: var(--accent);
+    }
+    .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .tag {
+        background: var(--tag-bg);
+        border: 1px solid var(--border-color);
+        font-size: 0.78rem;
+        font-family: var(--font-code);
+        padding: 0.3rem 0.65rem;
+        border-radius: 4px;
+        color: var(--text-secondary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 class="section-title">Technical Expertise</h2>
+<div class="skills-grid">
+    {% for category, items in profile.skills.items() %}
+    <div class="card skill-card">
+        <h4>{{ category }}</h4>
+        <div class="tags">
+            {% for item in items %}
+            <span class="tag">{{ item }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

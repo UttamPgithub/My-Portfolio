@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ profile.name }} | {{ profile.title }}{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: rgba(22, 27, 34, 0.88);
+            --border-color: #30363d;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --accent: #58a6ff;
+            --accent-hover: #1f6feb;
+            --tag-bg: #21262d;
+            --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            position: relative;
+            z-index: 10;
+            width: 100%;
+        }
+
+        main.container {
+            flex: 1;
+            padding-top: 2rem;
+            padding-bottom: 3.5rem;
+        }
+
+        /* Sticky Navigation Bar */
+        .navbar {
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(11, 14, 20, 0.94);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .logo {
+            font-family: var(--font-code);
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 1.05rem;
+            text-decoration: none;
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-left: 0.35rem;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            transition: all 0.25s ease;
+            display: inline-block;
+        }
+
+        nav a:hover, nav a.active {
+            color: #ffffff;
+            background: rgba(88, 166, 255, 0.2);
+            border: 1px solid rgba(88, 166, 255, 0.4);
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.6rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            backdrop-filter: blur(8px);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.65rem 1.25rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn:hover { transform: translateY(-2px); }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: #0d1117;
+            border: 1px solid var(--accent);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            border-color: var(--accent-hover);
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background-color: var(--tag-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #30363d;
+            border-color: #8b949e;
+        }
+
+        footer {
+            padding: 2rem 0;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            position: relative;
+            z-index: 10;
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <header class="navbar">
+        <div class="container nav-content">
+            <a href="{{ url_for('home') }}" class="logo">&lt;{{ profile.name.split()[0] }}.scrape()/&gt;</a>
+            <nav id="navbar-links">
+                <a href="{{ url_for('home') }}" class="{% block nav_home %}{% endblock %}">Home</a>
+                <a href="{{ url_for('projects') }}" class="{% block nav_projects %}{% endblock %}">Projects</a>
+                <a href="{{ url_for('skills') }}" class="{% block nav_skills %}{% endblock %}">Skills</a>
+                <a href="{{ url_for('experience') }}" class="{% block nav_experience %}{% endblock %}">Experience</a>
+                <a href="{{ url_for('education') }}" class="{% block nav_education %}{% endblock %}">Education</a>
+                <a href="{{ url_for('contact') }}" class="{% block nav_contact %}{% endblock %}">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 {{ profile.name }}. Python Web Scraping &amp; Data Pipeline Architecture.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('bg-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 1, 1400);
+            camera.position.z = 430;
+
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const nodeCount = 90;
+            const nodeGeometry = new THREE.BufferGeometry();
+            const nodePositions = new Float32Array(nodeCount * 3);
+            const nodeVelocities = [];
+
+            for (let i = 0; i < nodeCount * 3; i += 3) {
+                nodePositions[i] = (Math.random() - 0.5) * 800;
+                nodePositions[i + 1] = (Math.random() - 0.5) * 800;
+                nodePositions[i + 2] = (Math.random() - 0.5) * 700;
+
+                nodeVelocities.push({
+                    x: (Math.random() - 0.5) * 0.3,
+                    y: (Math.random() - 0.5) * 0.3,
+                    z: (Math.random() - 0.5) * 0.2
+                });
+            }
+
+            nodeGeometry.setAttribute('position', new THREE.BufferAttribute(nodePositions, 3));
+            const nodeMesh = new THREE.Points(nodeGeometry, new THREE.PointsMaterial({
+                color: 0x58a6ff, size: 4.5, transparent: true, opacity: 0.85
+            }));
+            scene.add(nodeMesh);
+
+            const packetCount = 20;
+            const packetGeometry = new THREE.SphereGeometry(2.2, 8, 8);
+            const packetMaterial = new THREE.MeshBasicMaterial({ color: 0x3fb950 });
+            const packetMeshes = [];
+
+            for (let i = 0; i < packetCount; i++) {
+                const mesh = new THREE.Mesh(packetGeometry, packetMaterial);
+                scene.add(mesh);
+                packetMeshes.push({
+                    mesh: mesh,
+                    startIdx: Math.floor(Math.random() * nodeCount),
+                    endIdx: Math.floor(Math.random() * nodeCount),
+                    progress: Math.random()
+                });
+            }
+
+            const lineMaterial = new THREE.LineBasicMaterial({ color: 0x1f6feb, transparent: true, opacity: 0.22 });
+            let lineSegments = null;
+            let mouseX = 0, mouseY = 0;
+
+            window.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX - window.innerWidth / 2) * 0.04;
+                mouseY = (e.clientY - window.innerHeight / 2) * 0.04;
+            });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                camera.position.x += (mouseX - camera.position.x) * 0.05;
+                camera.position.y += (-mouseY - camera.position.y) * 0.05;
+                camera.lookAt(scene.position);
+
+                nodeMesh.rotation.y += 0.0006;
+                const pos = nodeGeometry.attributes.position.array;
+                const lineCoords = [];
+
+                for (let i = 0; i < nodeCount; i++) {
+                    const idx = i * 3;
+                    pos[idx] += nodeVelocities[i].x;
+                    pos[idx + 1] += nodeVelocities[i].y;
+                    pos[idx + 2] += nodeVelocities[i].z;
+
+                    if (pos[idx] < -400 || pos[idx] > 400) nodeVelocities[i].x *= -1;
+                    if (pos[idx + 1] < -400 || pos[idx + 1] > 400) nodeVelocities[i].y *= -1;
+                    if (pos[idx + 2] < -350 || pos[idx + 2] > 350) nodeVelocities[i].z *= -1;
+
+                    for (let j = i + 1; j < nodeCount; j++) {
+                        const jdx = j * 3;
+                        const dist = Math.hypot(pos[idx] - pos[jdx], pos[idx + 1] - pos[jdx + 1], pos[idx + 2] - pos[jdx + 2]);
+                        if (dist < 110) {
+                            lineCoords.push(pos[idx], pos[idx + 1], pos[idx + 2]);
+                            lineCoords.push(pos[jdx], pos[jdx + 1], pos[jdx + 2]);
+                        }
+                    }
+                }
+                nodeGeometry.attributes.position.needsUpdate = true;
+
+                if (lineSegments) scene.remove(lineSegments);
+                const lineGeo = new THREE.BufferGeometry();
+                lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(lineCoords, 3));
+                lineSegments = new THREE.LineSegments(lineGeo, lineMaterial);
+                scene.add(lineSegments);
+
+                packetMeshes.forEach(pkt => {
+                    pkt.progress += 0.015;
+                    if (pkt.progress >= 1) {
+                        pkt.progress = 0;
+                        pkt.startIdx = Math.floor(Math.random() * nodeCount);
+                        pkt.endIdx = Math.floor(Math.random() * nodeCount);
+                    }
+                    const sIdx = pkt.startIdx * 3;
+                    const eIdx = pkt.endIdx * 3;
+                    pkt.mesh.position.x = pos[sIdx] + (pos[eIdx] - pos[sIdx]) * pkt.progress;
+                    pkt.mesh.position.y = pos[sIdx + 1] + (pos[eIdx + 1] - pos[sIdx + 1]) * pkt.progress;
+                    pkt.mesh.position.z = pos[sIdx + 2] + (pos[eIdx + 2] - pos[sIdx + 2]) * pkt.progress;
+                });
+
+                renderer.render(scene, camera);
+            }
+            animate();
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

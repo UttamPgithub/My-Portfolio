@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Education | {{ profile.name }}{% endblock %}
+{% block nav_education %}active{% endblock %}
+
+{% block content %}
+<h2 class="section-title">Academic Qualifications</h2>
+<div class="card">
+    <h3 style="font-size: 1.25rem;">{{ profile.education.degree }}</h3>
+    <p style="color: var(--accent); font-size: 0.95rem; margin-top: 0.2rem;">
+        {{ profile.education.institution }}
+    </p>
+    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.2rem;">
+        Batch: {{ profile.education.period }}
+    </p>
+    <div style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+        <p style="font-size: 0.9rem; color: var(--text-secondary);">
+            <strong style="color: var(--text-primary);">Relevant Coursework:</strong> {{ profile.education.coursework }}
+        </p>
+    </div>
+</div>
+{% endblock %}

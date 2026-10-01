@@ -1,854 +1,123 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ profile.name }} | Python Web Scraping Developer</title>
+{% extends "base.html" %}
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+{% block title %}Home | {{ profile.name }}{% endblock %}
+{% block nav_home %}active{% endblock %}
 
-    <!-- Three.js CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+{% block extra_css %}
+<style>
+    .hero-split {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 2rem;
+        align-items: center;
+        padding: 3rem 0;
+    }
+    .hero-badge {
+        display: inline-block;
+        padding: 0.3rem 0.75rem;
+        font-size: 0.75rem;
+        color: #3fb950;
+        background: rgba(63, 185, 80, 0.12);
+        border: 1px solid rgba(63, 185, 80, 0.35);
+        border-radius: 999px;
+        margin-bottom: 1.2rem;
+        font-family: var(--font-code);
+    }
+    .hero h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; }
+    .subheading { color: var(--accent); font-size: 1.2rem; margin-top: 0.4rem; font-weight: 600; }
+    .bio { color: var(--text-secondary); font-size: 0.95rem; margin-top: 1rem; line-height: 1.6; }
+    .hero-actions { margin-top: 1.5rem; display: flex; gap: 1rem; }
+    
+    .terminal-card {
+        background: rgba(13, 17, 23, 0.95);
+        border: 1px solid rgba(88, 166, 255, 0.35);
+        border-radius: 8px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+        overflow: hidden;
+        font-family: var(--font-code);
+    }
+    .terminal-bar {
+        background: #161b22;
+        padding: 0.6rem 0.8rem;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+    }
+    .terminal-buttons { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.red { background: #ff5f56; }
+    .dot.yellow { background: #ffbd2e; }
+    .dot.green { background: #27c93f; }
+    .terminal-title { position: absolute; left: 50%; transform: translateX(-50%); font-size: 0.75rem; color: var(--text-secondary); }
+    .terminal-body { padding: 1rem; height: 180px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 0.45rem; }
+    .terminal-line { font-size: 0.8rem; line-height: 1.4; }
+    .log-info { color: #8b949e; }
+    .log-success { color: #3fb950; }
+    .log-accent { color: #58a6ff; }
 
-    <style>
-        :root {
-            --bg-color: #0b0e14;
-            --card-bg: rgba(22, 27, 34, 0.88);
-            --border-color: #30363d;
-            --text-primary: #f0f6fc;
-            --text-secondary: #8b949e;
-            --accent: #58a6ff;
-            --accent-hover: #1f6feb;
-            --tag-bg: #21262d;
-            --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
-        }
+    @media (max-width: 800px) {
+        .hero-split { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            font-family: var(--font-main);
-            line-height: 1.6;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* 3D Background Canvas Layer - Strictly Behind Content */
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .container {
-            max-width: 960px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* Sticky Navigation Bar */
-        .navbar {
-            border-bottom: 1px solid var(--border-color);
-            background-color: rgba(11, 14, 20, 0.94);
-            backdrop-filter: blur(12px);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .nav-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 64px;
-        }
-
-        .logo {
-            font-family: var(--font-code);
-            font-weight: 600;
-            color: var(--accent);
-            font-size: 1.05rem;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        nav a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            margin-left: 0.6rem;
-            font-size: 0.88rem;
-            font-weight: 500;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            transition: all 0.25s ease;
-            cursor: pointer;
-            display: inline-block;
-        }
-
-        nav a:hover, nav a.active-topic {
-            color: #ffffff;
-            background: rgba(88, 166, 255, 0.2);
-            border: 1px solid rgba(88, 166, 255, 0.4);
-        }
-
-        /* Interactive Sections with Zoom Transition */
-        .section {
-            padding: 3.5rem 0;
-            border-bottom: 1px solid var(--border-color);
-            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1),
-                        opacity 0.5s ease,
-                        filter 0.5s ease;
-            transform-origin: center center;
-            position: relative;
-            will-change: transform, opacity;
-        }
-
-        /* ZOOM IN FOCUS STATE */
-        .section.is-zoomed {
-            transform: scale(1.06) !important;
-            opacity: 1 !important;
-            filter: blur(0px) !important;
-            z-index: 40;
-        }
-
-        .section.is-zoomed .card {
-            border-color: #58a6ff !important;
-            box-shadow: 0 0 30px rgba(88, 166, 255, 0.25) !important;
-        }
-
-        /* ZOOM OUT & DIMMED STATE FOR INACTIVE SECTIONS */
-        .section.is-dimmed {
-            transform: scale(0.94) !important;
-            opacity: 0.25 !important;
-            filter: blur(2px) !important;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            font-weight: 700;
-        }
-
-        /* Hero Layout */
-        .hero {
-            padding-top: 4rem;
-        }
-
-        .hero-split {
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .hero-badge {
-            display: inline-block;
-            padding: 0.3rem 0.75rem;
-            font-size: 0.75rem;
-            color: #3fb950;
-            background: rgba(63, 185, 80, 0.12);
-            border: 1px solid rgba(63, 185, 80, 0.35);
-            border-radius: 999px;
-            margin-bottom: 1.2rem;
-            font-family: var(--font-code);
-        }
-
-        .hero h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            line-height: 1.2;
-        }
-
-        .subheading {
-            color: var(--accent);
-            font-size: 1.2rem;
-            margin-top: 0.4rem;
-            font-weight: 600;
-        }
-
-        .bio {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-top: 1rem;
-            line-height: 1.6;
-        }
-
-        /* Functional Hero Action Buttons */
-        .hero-actions {
-            margin-top: 1.5rem;
-            display: flex;
-            gap: 1rem;
-            position: relative;
-            z-index: 500 !important;
-            pointer-events: auto !important;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.65rem 1.25rem;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer !important;
-            pointer-events: auto !important;
-            transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
-            position: relative;
-            z-index: 501 !important;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .btn-primary {
-            background-color: var(--accent);
-            color: #0d1117;
-            border: 1px solid var(--accent);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--accent-hover);
-            border-color: var(--accent-hover);
-            color: #ffffff;
-        }
-
-        .btn-secondary {
-            background-color: var(--tag-bg);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-secondary:hover {
-            background-color: #30363d;
-            border-color: #8b949e;
-        }
-
-        /* Scraping Terminal Window */
-        .terminal-card {
-            background: rgba(13, 17, 23, 0.95);
-            border: 1px solid rgba(88, 166, 255, 0.35);
-            border-radius: 8px;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
-            overflow: hidden;
-            font-family: var(--font-code);
-        }
-
-        .terminal-bar {
-            background: #161b22;
-            padding: 0.6rem 0.8rem;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            position: relative;
-        }
-
-        .terminal-buttons {
-            display: flex;
-            gap: 6px;
-        }
-
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-        .dot.red { background: #ff5f56; }
-        .dot.yellow { background: #ffbd2e; }
-        .dot.green { background: #27c93f; }
-
-        .terminal-title {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        .terminal-body {
-            padding: 1rem;
-            height: 180px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            gap: 0.45rem;
-        }
-
-        .terminal-line {
-            font-size: 0.8rem;
-            line-height: 1.4;
-        }
-
-        .log-info { color: #8b949e; }
-        .log-success { color: #3fb950; }
-        .log-accent { color: #58a6ff; }
-
-        /* General Card Layout */
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            backdrop-filter: blur(8px);
-            transition: all 0.4s ease;
-        }
-
-        /* Skills Grid */
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 1rem;
-        }
-
-        .skill-card h4 {
-            margin-bottom: 0.75rem;
-            font-size: 0.95rem;
-        }
-
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .tag {
-            background: var(--tag-bg);
-            border: 1px solid var(--border-color);
-            font-size: 0.75rem;
-            font-family: var(--font-code);
-            padding: 0.25rem 0.6rem;
-            border-radius: 4px;
-            color: var(--text-secondary);
-        }
-
-        /* Timeline */
-        .timeline {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 0.8rem;
-        }
-
-        .item-header h4 {
-            font-size: 1.1rem;
-        }
-
-        .company {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-        }
-
-        .period-badge {
-            font-family: var(--font-code);
-            font-size: 0.75rem;
-            background: var(--tag-bg);
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            white-space: nowrap;
-        }
-
-        .bullet-list {
-            margin-left: 1.2rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
-        /* Project Categories */
-        .domains-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1rem;
-        }
-
-        .domain-card {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem 1.2rem;
-        }
-
-        .domain-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: var(--accent);
-            box-shadow: 0 0 8px var(--accent);
-        }
-
-        /* Contact Details */
-        .contact-card h3 {
-            margin-bottom: 0.5rem;
-        }
-
-        .contact-card p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .contact-links {
-            margin-top: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .contact-links a {
-            color: var(--accent);
-            text-decoration: none;
-            width: fit-content;
-        }
-
-        .contact-links a:hover {
-            text-decoration: underline;
-        }
-
-        .contact-links span {
-            color: var(--text-secondary);
-        }
-
-        footer {
-            padding: 2.5rem 0;
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            position: relative;
-            z-index: 10;
-        }
-
-        @media (max-width: 800px) {
-            .hero-split {
-                grid-template-columns: 1fr;
-            }
-            .item-header {
-                flex-direction: column;
-                gap: 0.4rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <canvas id="bg-canvas"></canvas>
-
-    <header class="navbar">
-        <div class="container nav-content">
-            <span class="logo" id="reset-view">&lt;{{ profile.name.split()[0] }}.scrape()/&gt;</span>
-            <nav id="navbar-links">
-                <a href="#about" class="nav-topic">About</a>
-                <a href="#skills" class="nav-topic">Skills</a>
-                <a href="#experience" class="nav-topic">Experience</a>
-                <a href="#domains" class="nav-topic">Domains</a>
-                <a href="#education" class="nav-topic">Education</a>
-                <a href="#contact" class="nav-topic">Contact</a>
-            </nav>
+{% block content %}
+<section class="hero-split">
+    <div class="hero-text">
+        <div class="hero-badge">Pipeline Status: 200 OK</div>
+        <h1>{{ profile.name }}</h1>
+        <h2 class="subheading">{{ profile.title }}</h2>
+        <p class="bio">{{ profile.bio }}</p>
+        <div class="hero-actions">
+            <a href="{{ url_for('projects') }}" class="btn btn-primary">
+                View My Projects
+            </a>
+            <a href="{{ profile.contact.github }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+                GitHub Profile
+            </a>
         </div>
-    </header>
+    </div>
 
-    <main class="container">
-        <!-- Hero Section -->
-        <section id="about" class="hero section">
-            <div class="hero-split">
-                <div class="hero-text">
-                    <div class="hero-badge">Pipeline Status: 200 OK</div>
-                    <h1>{{ profile.name }}</h1>
-                    <h2 class="subheading">{{ profile.title }}</h2>
-                    <p class="bio">{{ profile.bio }}</p>
-                    <div class="hero-actions">
-                        <!-- Direct GitHub Profile Button -->
-                        <a href="{{ profile.contact.github }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-                            <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: text-bottom; margin-right: 7px;">
-                                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
-                            </svg>
-                            GitHub Profile
-                        </a>
-
-                        <!-- Direct LinkedIn Profile Button -->
-                        <a href="{{ profile.contact.linkedin }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
-                            LinkedIn Profile
-                        </a>
-                    </div>
-                </div>
-
-                <div class="terminal-card">
-                    <div class="terminal-bar">
-                        <div class="terminal-buttons">
-                            <span class="dot red"></span>
-                            <span class="dot yellow"></span>
-                            <span class="dot green"></span>
-                        </div>
-                        <span class="terminal-title">scrapy_spider_engine.py</span>
-                    </div>
-                    <div class="terminal-body" id="spider-terminal">
-                        <p class="terminal-line log-info">[scrapy.core.engine] Spider opened: data_crawler</p>
-                    </div>
-                </div>
+    <div class="terminal-card">
+        <div class="terminal-bar">
+            <div class="terminal-buttons">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
             </div>
-        </section>
-
-        <!-- Technical Skills -->
-        <section id="skills" class="section">
-            <h3 class="section-title">Technical Expertise</h3>
-            <div class="skills-grid">
-                {% for category, items in profile.skills.items() %}
-                <div class="card skill-card">
-                    <h4>{{ category }}</h4>
-                    <div class="tags">
-                        {% for item in items %}
-                        <span class="tag">{{ item }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <!-- Experience Timeline -->
-        <section id="experience" class="section">
-            <h3 class="section-title">Professional Experience</h3>
-            <div class="timeline">
-                {% for job in profile.experience %}
-                <div class="timeline-item card">
-                    <div class="item-header">
-                        <div>
-                            <h4>{{ job.role }}</h4>
-                            <span class="company">{{ job.company }} &bull; {{ job.location }}</span>
-                        </div>
-                        <span class="period-badge">{{ job.period }}</span>
-                    </div>
-                    <ul class="bullet-list">
-                        {% for point in job.highlights %}
-                        <li>{{ point }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <!-- Project Domains -->
-        <section id="domains" class="section">
-            <h3 class="section-title">Project Categories</h3>
-            <div class="domains-grid">
-                {% for domain in profile.project_domains %}
-                <div class="card domain-card">
-                    <span class="domain-dot"></span>
-                    <p>{{ domain }}</p>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <!-- Education -->
-        <section id="education" class="section">
-            <h3 class="section-title">Education</h3>
-            <div class="card">
-                <h4>{{ profile.education.degree }}</h4>
-                <p class="company">{{ profile.education.institution }} ({{ profile.education.period }})</p>
-                <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">
-                    <strong>Relevant Coursework:</strong> {{ profile.education.coursework }}
-                </p>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact" class="section">
-            <div class="card contact-card">
-                <h3>Contact & Connect</h3>
-                <p>Feel free to reach out for contracting, consulting, or engineering roles.</p>
-                <div class="contact-links">
-                    <a href="mailto:{{ profile.contact.email }}"><span>Email:</span> {{ profile.contact.email }}</a>
-                    <a href="tel:{{ profile.contact.phone }}"><span>Phone:</span> {{ profile.contact.phone }}</a>
-                    <p><span>Location:</span> {{ profile.contact.location }}</p>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 {{ profile.name }}. Python Web Scraping &amp; Data Pipeline Architecture.</p>
+            <span class="terminal-title">scrapy_spider_engine.py</span>
         </div>
-    </footer>
+        <div class="terminal-body" id="spider-terminal">
+            <p class="terminal-line log-info">[scrapy.core.engine] Spider opened: data_crawler</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // ==========================================================
-            // 1. Three.js Engine: Interactive Spider Web Crawler Canvas
-            // ==========================================================
-            const canvas = document.getElementById('bg-canvas');
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 1, 1400);
-
-            camera.position.z = 430;
-            let targetFov = 65; // Dynamic FOV lens zoom controller
-
-            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-            const nodeCount = 90;
-            const nodeGeometry = new THREE.BufferGeometry();
-            const nodePositions = new Float32Array(nodeCount * 3);
-            const nodeVelocities = [];
-
-            for (let i = 0; i < nodeCount * 3; i += 3) {
-                nodePositions[i] = (Math.random() - 0.5) * 800;
-                nodePositions[i + 1] = (Math.random() - 0.5) * 800;
-                nodePositions[i + 2] = (Math.random() - 0.5) * 700;
-
-                nodeVelocities.push({
-                    x: (Math.random() - 0.5) * 0.3,
-                    y: (Math.random() - 0.5) * 0.3,
-                    z: (Math.random() - 0.5) * 0.2
-                });
-            }
-
-            nodeGeometry.setAttribute('position', new THREE.BufferAttribute(nodePositions, 3));
-
-            const nodeMaterial = new THREE.PointsMaterial({
-                color: 0x58a6ff,
-                size: 4.5,
-                transparent: true,
-                opacity: 0.85
-            });
-
-            const nodeMesh = new THREE.Points(nodeGeometry, nodeMaterial);
-            scene.add(nodeMesh);
-
-            // Active Green Scraping Data Packets
-            const packetCount = 20;
-            const packetGeometry = new THREE.SphereGeometry(2.2, 8, 8);
-            const packetMaterial = new THREE.MeshBasicMaterial({ color: 0x3fb950 });
-            const packetMeshes = [];
-
-            for (let i = 0; i < packetCount; i++) {
-                const mesh = new THREE.Mesh(packetGeometry, packetMaterial);
-                scene.add(mesh);
-                packetMeshes.push({
-                    mesh: mesh,
-                    startIdx: Math.floor(Math.random() * nodeCount),
-                    endIdx: Math.floor(Math.random() * nodeCount),
-                    progress: Math.random()
-                });
-            }
-
-            const lineMaterial = new THREE.LineBasicMaterial({
-                color: 0x1f6feb,
-                transparent: true,
-                opacity: 0.22
-            });
-            let lineSegments = null;
-
-            let mouseX = 0, mouseY = 0;
-            window.addEventListener('mousemove', (e) => {
-                mouseX = (e.clientX - window.innerWidth / 2) * 0.04;
-                mouseY = (e.clientY - window.innerHeight / 2) * 0.04;
-            });
-
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-
-            function animate() {
-                requestAnimationFrame(animate);
-
-                // Smooth camera FOV zoom transition
-                if (Math.abs(camera.fov - targetFov) > 0.1) {
-                    camera.fov += (targetFov - camera.fov) * 0.08;
-                    camera.updateProjectionMatrix();
-                }
-
-                camera.position.x += (mouseX - camera.position.x) * 0.05;
-                camera.position.y += (-mouseY - camera.position.y) * 0.05;
-                camera.lookAt(scene.position);
-
-                nodeMesh.rotation.y += 0.0006;
-
-                const pos = nodeGeometry.attributes.position.array;
-                const lineCoords = [];
-
-                for (let i = 0; i < nodeCount; i++) {
-                    const idx = i * 3;
-                    pos[idx] += nodeVelocities[i].x;
-                    pos[idx + 1] += nodeVelocities[i].y;
-                    pos[idx + 2] += nodeVelocities[i].z;
-
-                    if (pos[idx] < -400 || pos[idx] > 400) nodeVelocities[i].x *= -1;
-                    if (pos[idx + 1] < -400 || pos[idx + 1] > 400) nodeVelocities[i].y *= -1;
-                    if (pos[idx + 2] < -350 || pos[idx + 2] > 350) nodeVelocities[i].z *= -1;
-
-                    for (let j = i + 1; j < nodeCount; j++) {
-                        const jdx = j * 3;
-                        const dist = Math.hypot(pos[idx] - pos[jdx], pos[idx + 1] - pos[jdx + 1], pos[idx + 2] - pos[jdx + 2]);
-                        if (dist < 110) {
-                            lineCoords.push(pos[idx], pos[idx + 1], pos[idx + 2]);
-                            lineCoords.push(pos[jdx], pos[jdx + 1], pos[jdx + 2]);
-                        }
-                    }
-                }
-                nodeGeometry.attributes.position.needsUpdate = true;
-
-                if (lineSegments) scene.remove(lineSegments);
-                const lineGeo = new THREE.BufferGeometry();
-                lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(lineCoords, 3));
-                lineSegments = new THREE.LineSegments(lineGeo, lineMaterial);
-                scene.add(lineSegments);
-
-                // Move data packets along network paths
-                packetMeshes.forEach(pkt => {
-                    pkt.progress += 0.015;
-                    if (pkt.progress >= 1) {
-                        pkt.progress = 0;
-                        pkt.startIdx = Math.floor(Math.random() * nodeCount);
-                        pkt.endIdx = Math.floor(Math.random() * nodeCount);
-                    }
-                    const sIdx = pkt.startIdx * 3;
-                    const eIdx = pkt.endIdx * 3;
-
-                    pkt.mesh.position.x = pos[sIdx] + (pos[eIdx] - pos[sIdx]) * pkt.progress;
-                    pkt.mesh.position.y = pos[sIdx + 1] + (pos[eIdx + 1] - pos[sIdx + 1]) * pkt.progress;
-                    pkt.mesh.position.z = pos[sIdx + 2] + (pos[eIdx + 2] - pos[sIdx + 2]) * pkt.progress;
-                });
-
-                renderer.render(scene, camera);
-            }
-            animate();
-
-            // ==========================================================
-            // 2. Zoom In / Zoom Out Toggle Controller
-            // ==========================================================
-            const allSections = document.querySelectorAll('.section');
-            const navLinks = document.querySelectorAll('.navbar nav a.nav-topic');
-            const resetBtn = document.getElementById('reset-view');
-
-            let activeZoomedId = null;
-
-            function zoomToSection(targetId) {
-                const targetSection = document.querySelector(targetId);
-                if (!targetSection) return;
-
-                // Toggle: Clicking the active topic again zooms out to normal view
-                if (activeZoomedId === targetId) {
-                    resetAllZoom();
-                    return;
-                }
-
-                activeZoomedId = targetId;
-                targetFov = 40; // Zoom camera in
-
-                navLinks.forEach(link => {
-                    if (link.getAttribute('href') === targetId) {
-                        link.classList.add('active-topic');
-                    } else {
-                        link.classList.remove('active-topic');
-                    }
-                });
-
-                allSections.forEach(sec => {
-                    if ('#' + sec.id === targetId) {
-                        sec.classList.remove('is-dimmed');
-                        sec.classList.add('is-zoomed');
-                    } else {
-                        sec.classList.remove('is-zoomed');
-                        sec.classList.add('is-dimmed');
-                    }
-                });
-
-                targetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-
-            function resetAllZoom() {
-                activeZoomedId = null;
-                targetFov = 65; // Zoom camera out
-
-                navLinks.forEach(link => link.classList.remove('active-topic'));
-                allSections.forEach(sec => {
-                    sec.classList.remove('is-zoomed', 'is-dimmed');
-                });
-            }
-
-            // Bind click handler exclusively to internal navbar section links
-            navLinks.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const href = btn.getAttribute('href');
-                    if (href && href.startsWith('#')) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        zoomToSection(href);
-                    }
-                });
-            });
-
-            if (resetBtn) resetBtn.addEventListener('click', resetAllZoom);
-            window.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') resetAllZoom();
-            });
-
-            // ==========================================================
-            // 3. Real-time Scraping Terminal Simulation
-            // ==========================================================
-            const terminal = document.getElementById('spider-terminal');
-            const logs = [
-                { text: '[playwright] Headless browser instance launched', class: 'log-info' },
-                { text: 'GET https://target-api.com/v1/catalog 200 OK', class: 'log-success' },
-                { text: 'Bypassing Cloudflare Turnstile token... [SUCCESS]', class: 'log-accent' },
-                { text: 'Parsed 2,450 records from XPath: //div[@class="item"]', class: 'log-success' },
-                { text: '[redis] Pushed 500 pagination URLs into pipeline queue', class: 'log-info' },
-                { text: 'Executing MySQL bulk upsert (1,200 rows/sec)...', class: 'log-accent' },
-                { text: 'Cleaned data schema with Pandas DataFrame (Quality 99.8%)', class: 'log-success' }
-            ];
-
-            let logIndex = 0;
-            setInterval(() => {
-                if (!terminal) return;
-                const entry = logs[logIndex % logs.length];
-                const p = document.createElement('p');
-                p.className = `terminal-line ${entry.class}`;
-                p.textContent = entry.text;
-                terminal.appendChild(p);
-
-                if (terminal.childElementCount > 6) {
-                    terminal.removeChild(terminal.firstElementChild);
-                }
-                terminal.scrollTop = terminal.scrollHeight;
-                logIndex++;
-            }, 1800);
-        });
-    </script>
-</body>
-</html>
+{% block extra_js %}
+<script>
+    const terminal = document.getElementById('spider-terminal');
+    const logs = [
+        { text: '[playwright] Headless browser instance launched', class: 'log-info' },
+        { text: 'GET https://target-api.com/v1/catalog 200 OK', class: 'log-success' },
+        { text: 'Bypassing Cloudflare Turnstile token... [SUCCESS]', class: 'log-accent' },
+        { text: 'Parsed 2,450 records from XPath: //div[@class="item"]', class: 'log-success' },
+        { text: '[redis] Pushed 500 pagination URLs into pipeline queue', class: 'log-info' },
+        { text: 'Executing MySQL bulk upsert (1,200 rows/sec)...', class: 'log-accent' },
+        { text: 'Cleaned data schema with Pandas DataFrame (Quality 99.8%)', class: 'log-success' }
+    ];
+    let logIndex = 0;
+    setInterval(() => {
+        if (!terminal) return;
+        const entry = logs[logIndex % logs.length];
+        const p = document.createElement('p');
+        p.className = `terminal-line ${entry.class}`;
+        p.textContent = entry.text;
+        terminal.appendChild(p);
+        if (terminal.childElementCount > 6) terminal.removeChild(terminal.firstElementChild);
+        terminal.scrollTop = terminal.scrollHeight;
+        logIndex++;
+    }, 1800);
+</script>
+{% endblock %}

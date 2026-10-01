@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Experience | {{ profile.name }}{% endblock %}
+{% block nav_experience %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timeline { display: flex; flex-direction: column; gap: 1.25rem; }
+    .item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem; }
+    .item-header h4 { font-size: 1.15rem; }
+    .company { color: var(--text-secondary); font-size: 0.88rem; }
+    .period-badge {
+        font-family: var(--font-code);
+        font-size: 0.75rem;
+        background: var(--tag-bg);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        white-space: nowrap;
+    }
+    .bullet-list {
+        margin-left: 1.2rem;
+        color: var(--text-secondary);
+        font-size: 0.92rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+    }
+    .domains-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    .domain-card {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.2rem;
+    }
+    .domain-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: var(--accent);
+        box-shadow: 0 0 8px var(--accent);
+    }
+    @media (max-width: 700px) {
+        .item-header { flex-direction: column; gap: 0.4rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 class="section-title">Professional Experience</h2>
+<div class="timeline">
+    {% for job in profile.experience %}
+    <div class="card timeline-item">
+        <div class="item-header">
+            <div>
+                <h4>{{ job.role }}</h4>
+                <span class="company">{{ job.company }} &bull; {{ job.location }}</span>
+            </div>
+            <span class="period-badge">{{ job.period }}</span>
+        </div>
+        <ul class="bullet-list">
+            {% for point in job.highlights %}
+            <li>{{ point }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+</div>
+
+<h2 class="section-title" style="margin-top: 3.5rem;">Crawl &amp; Extraction Domains</h2>
+<div class="domains-grid">
+    {% for domain in profile.project_domains %}
+    <div class="card domain-card">
+        <span class="domain-dot"></span>
+        <p>{{ domain }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
